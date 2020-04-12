@@ -33,6 +33,12 @@ public class TreeMap<T extends Comparable<T>, V> implements ITreeMap<T,V> {
         if(key==null) throw new RuntimeErrorException(new Error());
         INode<T,V> root = RB.getRoot();
         if (root==null ||root.isNull()) return null;
+        if(RB.contains(key)) {
+            MapEntry entry = new MapEntry();
+            entry.setKey(key);
+            entry.setValue(RB.search(key));
+            return entry;
+        }
         INode<T,V> suc = getSuccessor(root,key);
         if(suc==null) return null;
         MapEntry entry=new MapEntry();
@@ -59,17 +65,16 @@ public class TreeMap<T extends Comparable<T>, V> implements ITreeMap<T,V> {
     @Override
     public boolean containsValue(V value) {
         if(value==null)  throw new RuntimeErrorException(new Error());
-        Set<Map.Entry<T,V>> set = entrySet();
-        for(Map.Entry<T,V> entry : set){
+        ArrayList<Map.Entry<T,V>> arrayList =new ArrayList<>();
+        fillTheArrayList(arrayList,RB.getRoot());
+        for(Map.Entry<T,V> entry : arrayList){
             if (entry.getValue()==value||entry.getValue().equals(value)) return true;
         }
         return false;
     }
     @Override
     public Set<Map.Entry<T, V>> entrySet() {
-        ArrayList<Map.Entry<T,V>> arrayList = new ArrayList<>();
-        fillTheArrayList(arrayList,RB.getRoot());
-        return new HashSet<>(arrayList);
+        return new HashSet<>(fillTheArrayListForEntrySet(RB.getRoot()));
     }
     @Override
     public Map.Entry<T,V> firstEntry() {
@@ -90,6 +95,12 @@ public class TreeMap<T extends Comparable<T>, V> implements ITreeMap<T,V> {
     @Override
     public Map.Entry<T,V> floorEntry(T key) {
         if(key==null) throw new RuntimeErrorException(new Error());
+        if(RB.contains(key)) {
+            MapEntry entry = new MapEntry();
+            entry.setKey(key);
+            entry.setValue(RB.search(key));
+            return entry;
+        }
         INode<T,V> pre = getPredecessor(RB.getRoot(),key);
         if(pre==null) return null;
         MapEntry entry=new MapEntry();
@@ -109,23 +120,11 @@ public class TreeMap<T extends Comparable<T>, V> implements ITreeMap<T,V> {
     }
     @Override
     public ArrayList<Map.Entry<T,V>> headMap(T toKey) {
-        INode<T,V> pre =getPredecessor(RB.getRoot(),toKey);
-        if(pre==null) return new ArrayList<>();
-        ArrayList<Map.Entry<T,V>> arrayList = new ArrayList<>();
-        fillTheArrayList(arrayList,pre);
-        return  arrayList;
+        return null;
     }
     @Override
     public ArrayList<Map.Entry<T,V>> headMap(T toKey, boolean inclusive) {
-        if(!inclusive) return headMap(toKey);
-        boolean exist = RB.contains(toKey);
-        if(!exist) return headMap(toKey);
-        ArrayList<Map.Entry<T,V>> list = headMap(toKey);
-        MapEntry entry = new MapEntry();
-        entry.setValue(RB.search(toKey));
-        entry.setKey(toKey);
-        list.add(entry);
-        return list;
+        return null;
     }
     @Override
     public Set<T> keySet() {
@@ -194,10 +193,10 @@ public class TreeMap<T extends Comparable<T>, V> implements ITreeMap<T,V> {
     }
     @Override
     public Collection<V> values() {
-        Set<Map.Entry<T,V>> set = entrySet();
-        if(set==null) return null;
-        Collection<V> collections= new ArrayList<>();
-        for(Map.Entry<T,V> entry:set) collections.add(entry.getValue());
+        ArrayList<Map.Entry<T,V>> arrayList =new ArrayList<>();
+        fillTheArrayList(arrayList,RB.getRoot());
+        Collection<V> collections= new ArrayList<V>();
+        for (Map.Entry<T, V> tvEntry : arrayList) collections.add(tvEntry.getValue());
         return collections;
     }
     private INode<T, V> successor= null;
@@ -220,6 +219,33 @@ public class TreeMap<T extends Comparable<T>, V> implements ITreeMap<T,V> {
         }
         return successor;
     }
+    private INode<T, V> predecessor= null;
+    public INode<T, V> getPredecessor (INode<T,V> root, T key) {
+        if (root != null ) {
+            if (comparator.compare(root.getKey(),key) == 0) {
+                if (root.getLeftChild() != null ) {
+                    INode<T,V> t = root.getLeftChild();
+                    while (t.getRightChild() != null ) {
+                        t = t.getRightChild();
+                    }
+                    predecessor = t;
+                }
+            } else if (comparator.compare(root.getKey(),key)>0) {
+                getPredecessor(root.getLeftChild(),key);
+            } else if (comparator.compare(root.getKey(),key)<0) {
+                predecessor = root;
+                getPredecessor(root.getRightChild(),key);
+            }
+        }
+        return predecessor;
+    }
+
+    private class comp implements Comparator<T> {
+        public int compare(T a, T b)
+        {
+            return a.compareTo(b);
+        }
+    }
     private class MapEntry implements Map.Entry<T,V>{
         private T key ;
         private V value;
@@ -241,52 +267,34 @@ public class TreeMap<T extends Comparable<T>, V> implements ITreeMap<T,V> {
             return v;
         }
     }
-    private void fillTheArrayList(ArrayList<Map.Entry<T,V>> arrayList,INode<T,V> root) {
-        if(root == null)
-            return;
-        Stack<INode<T,V>> s = new Stack<>();
-        INode<T,V> currentNode=root;
-        while(!s.empty() || currentNode!=null){
-            if(currentNode!=null)
-            {
-                s.push(currentNode);
-                currentNode=currentNode.getLeftChild();
-            }
-            else
-            {
-                INode<T,V> n=s.pop();
-                MapEntry entry = new MapEntry();
-                entry.setKey(n.getKey());
-                entry.setValue(n.getValue());
-                arrayList.add(entry);
-                currentNode=n.getRightChild();
-            }
-        }
-    }
-    private INode<T, V> predecessor= null;
-    public INode<T, V> getPredecessor (INode<T,V> root, T key) {
-        if (root != null ) {
-            if (comparator.compare(root.getKey(),key) == 0) {
-                if (root.getLeftChild() != null ) {
-                    INode<T,V> t = root.getLeftChild();
-                    while (t.getRightChild() != null ) {
-                        t = t.getRightChild();
-                    }
-                    predecessor = t;
+
+    private ArrayList<Map.Entry<T,V>> fillTheArrayListForEntrySet(INode<T,V> root) {
+        ArrayList<Map.Entry<T,V>> arrayList = new ArrayList<>();
+        Stack<INode<T,V>> stack=new Stack<>();
+             while (!root.isNull()&&!stack.empty()){
+                while (root.isNull()){
+                    stack.push(root);
+                    root=root.getLeftChild();
                 }
-            } else if (comparator.compare(root.getKey(),key)>0) {
-                getPredecessor(root.getLeftChild(),key);
-            } else if (comparator.compare(root.getKey(),key)<0) {
-                predecessor = root;
-                getPredecessor(root.getRightChild(),key);
-            }
+                root=stack.peek();
+                stack.pop();
+                MapEntry entry =  new MapEntry();
+                entry.setValue(root.getValue());
+                entry.setKey(root.getKey());
+                arrayList.add(entry);
+                root=root.getRightChild();
         }
-        return predecessor;
+        return arrayList;
     }
-    private class comp implements Comparator<T> {
-        public int compare(T a, T b)
-        {
-            return a.compareTo(b);
+
+    private void fillTheArrayList(ArrayList<Map.Entry<T,V>> arrayList,INode<T,V> root){
+        if(root !=  null) {
+            fillTheArrayList(arrayList,root.getLeftChild());
+            MapEntry entry =  new MapEntry();
+            entry.setValue(root.getValue());
+            entry.setKey(root.getKey());
+            arrayList.add(entry);
+            fillTheArrayList(arrayList,root.getRightChild());
         }
     }
 }

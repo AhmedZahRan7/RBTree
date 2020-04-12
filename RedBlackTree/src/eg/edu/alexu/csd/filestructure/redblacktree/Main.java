@@ -29,7 +29,7 @@ public class Main {
         RB.insert(10,"10");
         RBTreePrinter.print(RB.getRoot());
 
-        System.out.println(getPredecessor(RB.getRoot(),4).getValue());
+        System.out.println(getPredecessor(RB.getRoot(),17).getValue());
 //        Set<Map.Entry<Integer,String>> set = map.entrySet();
 //        for (Map.Entry<Integer,String> entry : set) System.out.println(entry.getKey()+" ");
 
