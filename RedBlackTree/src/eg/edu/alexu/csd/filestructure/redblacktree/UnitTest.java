@@ -1290,6 +1290,7 @@ public class UnitTest {
 					return o1.getKey() - o2.getKey();
 				}
 			});
+			System.out.println(ans.size()+"  "+realAns.size());
 			for (int i = 0; i < ans.size(); i++) 
 				Assert.assertEquals(ans.get(i), realAns.get(i));
 		} catch (Throwable e) {
@@ -1692,11 +1693,11 @@ public class UnitTest {
 	}
 	
 	private boolean verifyProperty2(INode<Integer, String> node) {
-		return node.getColor() == INode.BLACK;
+		return node==null || node.getColor() == INode.BLACK;
 	}
 
 	private boolean verifyProperty3(INode<Integer, String> node) {
-		if (node == null || node.isNull()) return node.getColor() == INode.BLACK;
+		if (node == null || node.isNull()) return true;
 
 		return verifyProperty3(node.getLeftChild()) && verifyProperty3(node.getRightChild());
 	}

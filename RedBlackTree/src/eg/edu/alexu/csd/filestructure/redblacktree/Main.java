@@ -1,72 +1,66 @@
 package eg.edu.alexu.csd.filestructure.redblacktree;
 
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Set;
+
 public class Main {
+    private static INode<Integer, String> predecessor;
+
     public static void main(String[] args) {
-        RedBlackTree<Integer,String> tree = new RedBlackTree<>();
-        tree.insert(1,"1");
-        RBTreePrinter.print(tree.getRoot());
-        tree.insert(2,"2");
-        RBTreePrinter.print(tree.getRoot());
-        tree.insert(3,"3");
-        RBTreePrinter.print(tree.getRoot());
-        tree.insert(4,"4");
-        RBTreePrinter.print(tree.getRoot());
-        tree.insert(11,"11");
-        RBTreePrinter.print(tree.getRoot());
-        tree.insert(12,"12");
-        RBTreePrinter.print(tree.getRoot());
-        tree.insert(13,"13");
-        RBTreePrinter.print(tree.getRoot());
-        tree.insert(14,"14");
-        RBTreePrinter.print(tree.getRoot());
-        tree.insert(7,"7");
-        RBTreePrinter.print(tree.getRoot());
-        tree.insert(100,"100");
-        RBTreePrinter.print(tree.getRoot());
-        tree.insert(54,"54");
-        RBTreePrinter.print(tree.getRoot());
-        tree.insert(-2,"-2");
-        RBTreePrinter.print(tree.getRoot());
-        tree.insert(5,"5");
-        RBTreePrinter.print(tree.getRoot());
-        tree.insert(0,"0");
-        RBTreePrinter.print(tree.getRoot());
-        tree.insert(-5,"-5");
-        RBTreePrinter.print(tree.getRoot());
+        TreeMap<Integer,String> map = new TreeMap<>();
+        map.put(1,"1");
+        map.put(0,"0");
+        map.put(3,"3");
+        map.put(6,"6");
+        map.put(4,"4");
+        map.put(13,"13");
+        map.put(16,"16");
+        map.put(10,"10");
 
+        RedBlackTree<Integer,String> RB = new RedBlackTree();
+        RB.insert(1,"1");
+        RB.insert(0,"0");
+        RB.insert(3,"3");
+        RB.insert(6,"6");
+        RB.insert(4,"4");
+        RB.insert(13,"13");
+        RB.insert(16,"16");
+        RB.insert(10,"10");
+        RBTreePrinter.print(RB.getRoot());
 
-        System.out.println(tree.delete(1));
-        RBTreePrinter.print(tree.getRoot());
-        System.out.println(tree.delete(2));
-        RBTreePrinter.print(tree.getRoot());
-        System.out.println(tree.delete(3));
-        RBTreePrinter.print(tree.getRoot());
-        System.out.println(tree.delete(4));
-        RBTreePrinter.print(tree.getRoot());
-        System.out.println(tree.delete(5));
-        RBTreePrinter.print(tree.getRoot());
-        System.out.println(tree.delete(-5));
-        RBTreePrinter.print(tree.getRoot());
-        System.out.println(tree.delete(-2));
-        RBTreePrinter.print(tree.getRoot());
-        System.out.println(tree.delete(7));
-        RBTreePrinter.print(tree.getRoot());
-        System.out.println(tree.delete(11));
-        RBTreePrinter.print(tree.getRoot());
-        System.out.println(tree.delete(12));
-        RBTreePrinter.print(tree.getRoot());
-        System.out.println(tree.delete(13));
-        RBTreePrinter.print(tree.getRoot());
-        System.out.println(tree.delete(14));
-        RBTreePrinter.print(tree.getRoot());
-        System.out.println(tree.delete(54));
-        RBTreePrinter.print(tree.getRoot());
-        System.out.println(tree.delete(100));
-        RBTreePrinter.print(tree.getRoot());
-        System.out.println(tree.delete(0));
-        RBTreePrinter.print(tree.getRoot());
+        System.out.println(getPredecessor(RB.getRoot(),4).getValue());
+//        Set<Map.Entry<Integer,String>> set = map.entrySet();
+//        for (Map.Entry<Integer,String> entry : set) System.out.println(entry.getKey()+" ");
 
+    }
 
+    static Comparator comparator = new comp();
+    public static INode<Integer,String>getPredecessor (INode<Integer,String> root, Integer key) {
+        if (root != null ) {
+            if (comparator.compare(root.getKey(),key) == 0) {
+                if (root.getLeftChild() != null ) {
+                    INode<Integer,String> t = root.getLeftChild();
+                    while (t.getRightChild() != null ) {
+                        t = t.getRightChild();
+                    }
+                    predecessor = t;
+                }
+            } else if (comparator.compare(root.getKey(),key)>0) {
+                getPredecessor(root.getLeftChild(),key);
+            } else if (comparator.compare(root.getKey(),key)<0) {
+                predecessor = root;
+                getPredecessor(root.getRightChild(),key);
+            }
+        }
+        return predecessor;
+    }
 
+    private static class comp implements Comparator<Integer>
+    {
+        public int compare(Integer a, Integer b)
+        {
+            return a.compareTo(b);
+        }
     }
 }
