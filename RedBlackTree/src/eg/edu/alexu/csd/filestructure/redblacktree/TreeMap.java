@@ -138,21 +138,21 @@ public class TreeMap<T extends Comparable<T>, V> implements ITreeMap<T,V> {
     @Override
     public ArrayList<Map.Entry<T,V>> headMap(T toKey, boolean inclusive) {
         if(RB.getRoot()==null)return null;
-        if(inclusive==false){return headMap(toKey);}
+        if(!inclusive){return headMap(toKey);}
         else{
-                Set<T> treeSet =  keySet();
-                ArrayList<Map.Entry<T,V>> set = new ArrayList<>();
-                for (T k : treeSet) {
-                    if (k.compareTo(toKey) >= 0) {
-                        MapEntry entry = new MapEntry();
-                        entry.setValue(get(k));
-                        entry.setKey(k);
-                        set.add(entry);
-                    } else {
-                        break;
-                    }
+            Set<T> treeSet =  keySet();
+            ArrayList<Map.Entry<T,V>> set = new ArrayList<>();
+            for (T k : treeSet) {
+                if (k.compareTo(toKey) >= 0) {
+                    MapEntry entry = new MapEntry();
+                    entry.setValue(get(k));
+                    entry.setKey(k);
+                    set.add(entry);
+                } else {
+                    break;
                 }
-                return set;
+            }
+            return set;
         }
     }
     @Override
